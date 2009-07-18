@@ -25,7 +25,7 @@ require_once('Flatcache.php');
 
 class LastFm  {
 
-  const BASEURL = '';
+  const BASEURL = 'http://ws.audioscrobbler.com/2.0/';
 
   //set default values for parameters here
   private $params = array(
@@ -49,32 +49,39 @@ class LastFm  {
       if(!dir_exists($params['cacheDir'])) {
         throw new Exception('Cache directory not available');
       }
-      else {
-        //setup flatcache
-        $opts = array(
-                   //temporary, must be checked later which one is more universal
-                   'cacheId'  => $params['method'].$params['artist'], 
-                   'timeout'  => $params['cacheTimeout'],
-                   'cacheDir' => $params['cacheDir']
-                 );
-        $this->flatcache = new Flatcache($opts);
-      }
-      
+
+      //setup flatcache
+      $opts = array(
+                 'cacheId'  => $this->concatParams(), 
+                 'timeout'  => $params['cacheTimeout'],
+                 'cacheDir' => $params['cacheDir']
+               );
+      $this->flatcache = new Flatcache($opts);
     }
+    
+
+    $this->setParams($params);
   }
 
 
   public function setParams($array){
     foreach($array as $key => $val) {
-      $this->params[$key] => $val;
+      $this->params[$key] = $val;
     }
   }
 
 
   private function concatParams() {
-    $str = '&';
-    foreach($this->params as $key => $val) {
-      $str .= $key.'='.rawurlencode($val).'?';
+    //exclude cache options
+    foreach($this->params as $key => $value) {
+      if(!preg_match('/cache/', $key)) {
+        $params[$key] = $value;
+      }
+    }
+
+    $str = '?';
+    foreach($params as $key => $val) {
+      $str .= $key.'='.rawurlencode($val).'&';
     }
     //remove last question mark
     return substr($str, 0, strlen($str) - 1);
@@ -88,9 +95,9 @@ class LastFm  {
  	  if($this->flatcache) {
  	    $data = $this->flatcache->read();
  	  } 	  
- 	  elseif(!$data) { 	  
+ 	  elseif(!$data) {
 	   	$userAgent = 'gwutama last.fm PHP API';
-		  $curl = new Net_Curl(self::BASEURL . concatParams(), $userAgent);
+		  $curl = new Net_Curl(self::BASEURL . $this->concatParams(), $userAgent);
 		  $curl->followLocation = true;
 		  $curl->returnTransfer = true;
 		  $curl->setOption('CURLOPT_REFERER', $URL);

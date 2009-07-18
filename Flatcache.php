@@ -29,7 +29,7 @@ class Flatcache  {
   
     //set options
     foreach($options as $key => $val) {
-      $this->options[$key] => $val;
+      $this->options[$key] = $val;
     }
   }  
 
@@ -41,7 +41,7 @@ class Flatcache  {
     $foo = array(
       'timestamp' => $now,
       'data' => $data
-    )
+    );
     
     Storage::write(self::CACHEDIR . md5($cacheId), json_encode($foo));
   }
@@ -51,7 +51,7 @@ class Flatcache  {
     //cached file exists?
     $cache = $this->options['cacheDir'].md5($this->options['cacheId']);
     
-    if(!file_exists($cache) {
+    if(!file_exists($cache)) {
       throw new Exception('Cache file not exists. Supplied cache ID correct?');
     }
   
