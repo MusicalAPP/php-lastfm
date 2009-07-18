@@ -43,16 +43,16 @@ class Flatcache  {
       'data' => $data
     );
     
-    Storage::write(self::CACHEDIR . md5($cacheId), json_encode($foo));
+    Storage::write($this->options['cacheDir'] . md5($this->options['cacheId']), json_encode($foo));
   }
   
   
-  public static function read() {
+  public function read() {
     //cached file exists?
-    $cache = $this->options['cacheDir'].md5($this->options['cacheId']);
+    $cache = $this->options['cacheDir'] . md5($this->options['cacheId']);
     
     if(!file_exists($cache)) {
-      throw new Exception('Cache file not exists. Supplied cache ID correct?');
+      return null;
     }
   
     $now = time();

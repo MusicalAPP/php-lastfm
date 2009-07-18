@@ -39,28 +39,27 @@ class LastFm  {
 
 
   public function __construct($params) {
+    $this->setParams($params);
+    
     //at least method must be defined
-    if(!$params['method']) {
+    if(!$this->params['method']) {
       throw new Exception('Method must be defined.');
     }
 
     //cache enabled? then cacheDir must exist
-    if($params['cacheEnabled']) {
-      if(!dir_exists($params['cacheDir'])) {
+    if($this->params['cacheEnabled']) {
+      if(!is_dir($this->params['cacheDir'])) {
         throw new Exception('Cache directory not available');
       }
 
       //setup flatcache
       $opts = array(
                  'cacheId'  => $this->concatParams(), 
-                 'timeout'  => $params['cacheTimeout'],
-                 'cacheDir' => $params['cacheDir']
+                 'timeout'  => $this->params['cacheTimeout'],
+                 'cacheDir' => $this->params['cacheDir']
                );
       $this->flatcache = new Flatcache($opts);
     }
-    
-
-    $this->setParams($params);
   }
 
 
@@ -94,8 +93,12 @@ class LastFm  {
  	  //check whether caching is enabled or not. If enabled, then read/write cache
  	  if($this->flatcache) {
  	    $data = $this->flatcache->read();
- 	  } 	  
- 	  elseif(!$data) {
+ 	  }
+ 	  
+ 	  if($data) {
+ 	    return $data;
+ 	  }
+ 	  else {
 	   	$userAgent = 'gwutama last.fm PHP API';
 		  $curl = new Net_Curl(self::BASEURL . $this->concatParams(), $userAgent);
 		  $curl->followLocation = true;
@@ -111,8 +114,7 @@ class LastFm  {
 			  return $result; //return it
 		  }
 		}
-		else {}
-		
+
  	}
 
 
