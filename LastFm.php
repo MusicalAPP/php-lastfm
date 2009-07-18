@@ -24,6 +24,7 @@ require_once('Flatcache.php');
 class LastFm  {
 
   const BASEURL = 'http://ws.audioscrobbler.com/2.0/';
+  const BASEURLAUTH = 'http://www.last.fm/api/auth/';
 
   //set default values for parameters here
   private $params = array(
@@ -32,8 +33,10 @@ class LastFm  {
                         'cacheTimeout'  =>  3600, //in ms
                         'format'        => 'json'
                       );
+                      
   private $result;
   private $flatcache = null;
+
 
 
   public function __construct($params) {
@@ -97,14 +100,8 @@ class LastFm  {
  	    return $data;
  	  }
  	  else {
-		  $ch = curl_init();
-		  curl_setopt($ch, CURLOPT_URL, self::BASEURL . $this->concatParams());
-      curl_setopt($ch, CURLOPT_USERAGENT, "gwutama last.fm PHP API binding");
-      curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-		  curl_setopt($ch, CURLOPT_HEADER, 0);
-		  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		  $response = curl_exec($ch);
-		  curl_close($ch);
+ 	    $url = self::BASEURL . utf8_encode($this->concatParams());
+      $response = $this->requestHTTP($url);
 
 	    //if caching enabled then write cache
 	    if($this->flatcache) {
@@ -115,6 +112,19 @@ class LastFm  {
 
 		}
 
+ 	}
+ 	
+ 	
+ 	private function requestHTTP($url) {
+	  $ch = curl_init();
+	  curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_USERAGENT, "gwutama last.fm PHP API binding");
+    curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+	  curl_setopt($ch, CURLOPT_HEADER, 0);
+	  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	  $response = curl_exec($ch);
+    curl_close($ch); 	
+    return $response;
  	}
 
 
