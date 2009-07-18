@@ -88,7 +88,7 @@ class LastFm  {
  	public function request() {
  	  $data = null;
  	
- 	  //check whether caching is enabled or not. If enabled, then read/write cache
+ 	  //check whether caching is enabled or not. If enabled, then read cache
  	  if($this->flatcache) {
  	    $data = $this->flatcache->read();
  	  }
