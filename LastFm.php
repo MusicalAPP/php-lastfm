@@ -18,8 +18,6 @@
 */
 
 
-require_once('Net/Curl.php'); //to be replaced with normal curl method
-
 require_once('Flatcache.php');
 
 
@@ -99,20 +97,22 @@ class LastFm  {
  	    return $data;
  	  }
  	  else {
-	   	$userAgent = 'gwutama last.fm PHP API';
-		  $curl = new Net_Curl(self::BASEURL . $this->concatParams(), $userAgent);
-		  $curl->followLocation = true;
-		  $curl->returnTransfer = true;
-		  $curl->setOption('CURLOPT_REFERER', $URL);
-		  $result = $curl->execute();
-		  if (!PEAR::isError($result)) {
-		    //if caching enabled then write cache
-		    if($this->flatcache) {
-		      $this->flatcache->write($result);
-		    }
-		    
-			  return $result; //return it
-		  }
+		  $ch = curl_init();
+		  curl_setopt($ch, CURLOPT_URL, self::BASEURL . $this->concatParams());
+      curl_setopt($ch, CURLOPT_USERAGENT, "gwutama last.fm PHP API binding");
+      curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+		  curl_setopt($ch, CURLOPT_HEADER, 0);
+		  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		  $response = curl_exec($ch);
+		  curl_close($ch);
+
+	    //if caching enabled then write cache
+	    if($this->flatcache) {
+	      $this->flatcache->write($response);
+	    }
+		  
+		  return $response;
+
 		}
 
  	}
