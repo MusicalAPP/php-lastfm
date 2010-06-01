@@ -1,0 +1,4 @@
+A crap-free and non-bloated PHP last.fm API.
+Flat-file caching is also supported.
+
+Usage: See example.
